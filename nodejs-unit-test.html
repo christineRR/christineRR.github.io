@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>nodejs unit test -- by liuxin.rkl</title>
+
+    <meta name="description" content="nodejs unit test mocha expect istanbul">
+    <meta name="author" content="liuxin.rkl">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.min.css">
+    <link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+    <script>
+      if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+      }
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section data-markdown>
+          <script type="text/template">
+          ## nodejs unit test
+
+          —— by [liuxin.rkl](https://github.com/christineRR) 2014-09-09
+          </script>
+        </section>
+
+        <section>
+          <section>
+            <h2>what unit test ?</h2>
+
+            <p>
+              单元测试（又称为模块测试, Unit Testing）是针对程序模块（软件设计的最小单位）来进行正确性检验的测试工作。OOP中的最小单位即方法。
+            </p>
+
+            <aside class="notes">
+              在过程化编程中，一个单元就是单个程序、函数、过程等；对于面向对象编程，最小单元就是方法，包括基类（超类）、抽象类、或者派生类（子类）中的方法。为测试时隔离模块，经常使用stubs、mock[1]或fake等测试马甲程序。单元测试是极限编程的基础，依赖于自动化的单元测试框架。
+            </aside>
+          </section>
+          <section>
+            <h2>why unit test ?</h2>
+            <ul>
+              <li class="fragment">代码质量</li>
+              <li class="fragment">快速的需求变更</li>
+              <li class="fragment">重构</li>
+            </ul>
+          </section>
+          <section data-markdown>
+            ## how unit test?
+
+            ```js
+            function division (a, b) {
+              if (b === 0) {
+                return 0;
+              } else {
+                return a/b;
+              }
+            }
+
+            function test(name, actual, expect) {
+              if (actual === expect) {
+                console.log(name + ' case passed!');
+              } else {
+                console.log(name + ' case failed!');
+              }
+            }
+
+            test('b != 0', division(10, 5), 2); // b !==0 case passed!
+            test('b === 0', division(10, 0), 0);
+            ```
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            ## 测试框架
+
+            [Testing / Spec Frameworks](https://github.com/joyent/node/wiki/modules#testing)
+
+            + Mocha     BDD or TDD
+            + Jasmine   BDD
+            + vows      BDD
+            + expresso  TDD
+            + nodeunit  TDD
+            + ...
+          </section>
+          <section data-markdown>
+            BDD:Behavior-driven development
+            ```js
+            // The "BDD" interface provides describe(), it(), before(), after(), beforeEach(), and afterEach()
+            describe('Array', function(){
+              before(function(){
+                // ...
+              });
+
+              describe('#indexOf()', function(){
+                it('should return -1 when not present', function(){
+                  [1,2,3].indexOf(4).should.equal(-1);
+                });
+              });
+            });
+            ```
+          </section>
+          <section data-markdown>
+            TDD:Test-driven development
+            ```js
+            // The "TDD" interface provides suite(), test(), setup(), and teardown().
+            suite('Array', function(){
+              setup(function(){
+                // ...
+              });
+
+              suite('#indexOf()', function(){
+                test('should return -1 when not present', function(){
+                  assert.equal(-1, [1,2,3].indexOf(4));
+                });
+              });
+            });
+            ```
+          </section>
+          <section>
+            <p>BDD和TDD的区别？</p>
+            <p class="fragment">
+            区别于TDD，BDD是从user story的角度来编码，在测试中的描述大多是“When [scenario], giving [conditions], it should [expected results]”。
+            </p>
+          </section>
+          <section>
+            <h2>如何选择测试框架？</h2>
+            <ul>
+              <li class="fragment">示例完整</li>
+              <li class="fragment">持续改进</li>
+              <li class="fragment">容易上手</li>
+            </ul>
+          </section>
+          <section data-markdown>
+            ## Mocha
+
+            [特性](http://visionmedia.github.io/mocha/)：
+
+            + browser support
+            + use any assertion library you want/任何你想使用的断言库
+            + extensible reporting, bundled with 9+ reporters/支持9中报告格式，且可扩展
+            + before, after, before each, after each hooks/钩子
+            + ...
+          </section>
+          <section data-markdown>
+            ## Jasmine
+
+            + 内建的断言匹配方法expect
+            + custom matchers/自定义的断言匹配
+            + spies/强大、灵活的spy
+            + ...
+          </section>
+        </section>
+
+        <section data-markdown>
+          ## spy and mock
+
+          保证单元测试的独立性，总要用的spy和mock
+
+          + [jm-spy](https://github.com/PerterPon/jm-spy) jasmine spies module
+          + [mm](http://github.com/fengmk2/mm) mock mate
+          + [sinonjs](http://sinonjs.org/)
+        </section>
+
+        <section>
+          <section>
+            <h2>断言库</h2>
+          </section>
+          <section data-markdown>
+            [should](https://github.com/visionmedia/should.js) BDD style
+
+            ```js
+            var should = require('should');
+
+            (5).should.be.exactly(5).and.be.a.Number;
+            ```
+          </section>
+          <section data-markdown>
+            [expect](https://github.com/LearnBoost/expect.js) BDD style with expect()
+
+            ```js
+            var expect = require('expect.js');
+
+            expect(5).to.be.a('number');
+            ```
+          </section>
+          <section data-markdown>
+            [chai](https://github.com/chaijs/chai) expect(), assert() and should style
+
+            ```js
+            var chai = require('chai')
+              , expect = chai.expect
+              , should = chai.should();
+            var foo = 'bar';
+
+            expect(foo).to.be.a('string');
+            foo.should.be.a('string');
+            ```
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>测试覆盖率</h2>
+            <ul>
+              <li class="fragment"><a href="http://siliconforks.com/jscoverage/">jscoverage</a> 行覆盖率</li>
+              <li class="fragment"><a href="https://github.com/gotwarlost/istanbul">istanbul</a>行覆盖率、分支覆盖率</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            ## 实战
+
+            [code](https://github.com/christineRR/unit-test-demo) with [mocha、expect、istanbul]
+            
+            需求：一个web应用-首页展示nodejs测试框架的列表
+          </section>
+          <section data-markdown>
+            ### 功能：
+            
+            + 应用首页
+            + 获取nodejs测试框架列表的api服务
+          </section>
+          <section data-markdown>
+            ## 项目目录
+
+            ```shell
+            // unit-test-demo
+            .
+            ├── lib
+            │   └── app.js
+            ├── test
+            │   └── app-test.js
+            ├── Makefile
+            ├── README.md
+            ├── index.html
+            ├── index.js
+            └── package.json
+            ```
+          </section>
+          <section data-markdown>
+            ## Makefile
+            ```shell
+            BIN_MOCHA = ./node_modules/.bin/mocha
+            BIN_ISTANBUL = ./node_modules/.bin/istanbul
+
+            install:
+              @npm install
+
+            test:
+              @$(BIN_MOCHA) \
+                --reporter $(REPORTER) \
+                --timeout $(TIMEOUT) \
+                $(TESTS)
+
+            test-cov:
+              @$(BIN_ISTANBUL) cover ./node_modules/.bin/_mocha \
+                -- -u exports -R $(REPORTER) -t $(TIMEOUT) \
+                $(TESTS)
+            ```
+          </section>
+          <section data-markdown>
+            #### 运行测试
+            ```shell
+            make test
+            ```
+            #### 运行测试覆盖率
+            ```shell
+            make test-cov
+            ```
+          </section>
+          <section data-markdown>
+            ## 行为驱动开发
+            先写测试：/test/app-test.js
+            ```js
+            var e = require('expect.js');
+            var request = require('supertest')
+            var app = require('../lib/app');
+
+            describe('Testing / Spec Frameworks app', function () {
+
+              before(function (done) {
+                app.listen(1234, done);
+              });
+              ...
+            ```
+            使用[supertest](https://github.com/visionmedia/supertest)进行http测试
+          </section>
+          <section data-markdown>
+            ## 应用首页html
+
+            ```js
+            it('GET / show the title, a loading container', function (done) {
+              request(app)
+              .get('/')
+              .expect(200)
+              .expect('Content-Type', 'text/html')
+              .end(function (err, res) {
+                e(err).to.be(null);
+                var body = res.text;
+                e(body).to.contain('<title>nodejs - Testing / Spec Frameworks</title>');
+                e(body).to.contain('<h2>Testing / Spec Frameworks</h2>');
+                e(body).to.contain('<div id="container">loading...</div>');
+                done();
+              });
+            });
+            ```
+          </section>
+          <section data-markdown>
+            ## 获取列表信息的api
+
+            ```js
+            it('GET /list show the frameworks list, in json data', function (done) {
+              request(app)
+              .get('/list')
+              .expect(200)
+              .expect('Content-Type', 'application/json')
+              .end(function (err, res) {
+                e(err).to.be(null);
+                var body = JSON.parse(res.text);
+                e(body).to.have.length(5);
+                done();
+              });
+            });
+            ```
+          </section>
+          <section data-markdown>
+            ## 404
+
+            ```js
+            it('GET /nopage page not found', function (done) {
+              request(app)
+              .get('/nopage')
+              .expect(200)
+              .expect('Content-Type', 'text/html')
+              .end(function (err, res) {
+                e(err).to.be(null);
+                var body = res.text;
+                e(body).to.be('Page not found');
+                done();
+              });
+            });
+            ```
+          </section>
+          <section data-markdown>
+            ## let's go ->
+
+            ![](http://gtms03.alicdn.com/tps/i3/TB1o2CHGXXXXXazXVXXNvo70FXX-1422-452.png)
+          </section>
+          <section data-markdown>
+            ## 实现app.js
+
+            ![](http://gtms02.alicdn.com/tps/i2/TB1GriVGXXXXXbDXpXXoaCX3pXX-1292-722.png)
+          </section>
+          <section data-markdown>
+            ## let's go again!
+
+            ![](http://gtms04.alicdn.com/tps/i4/TB10naCGXXXXXXcaXXX.3CJMXXX-894-258.png)
+          </section>
+          <section data-markdown>
+            ![](http://gtms03.alicdn.com/tps/i3/TB1_ROJGXXXXXbkXFXXBStGGXXX-32-32.gif)
+          </section>
+          <section data-markdown>
+            ## 来跑个覆盖率吧！
+            ![](http://gtms03.alicdn.com/tps/i3/TB1i8uOGXXXXXX3XFXX_zjQMFXX-1254-628.png)
+          </section>
+          <section data-markdown>
+            ## 详细的html coverage report
+            ![](http://gtms02.alicdn.com/tps/i2/TB1sTyUGXXXXXczXpXX9i3QPpXX-1896-492.png)
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            ## 不持续集成不舒服斯基？
+
+            + toast 内部持续集成服务 -> toastman
+            + travis-ci 开源的持续集成服务
+          </section>
+          <section data-markdown>
+            ## 持续集成到travis-ci
+
+            新增配置：.travis.yml
+
+            ```yaml
+            language: node_js
+            node_js:
+              - "0.11"
+              - "0.10"
+              - "0.8"
+            ```
+          </section>
+          <section data-markdown>
+            ![](http://gtms01.alicdn.com/tps/i1/TB1on9IGXXXXXbsXVXXsLbHJFXX-1776-992.png)
+          </section>
+          <section data-markdown>
+            ## 添加build status到项目中
+            ```md
+            [![Build Status](https://travis-ci.org/christineRR/unit-test-demo.svg?branch=master)](https://travis-ci.org/christineRR/unit-test-demo)
+            ```
+            ![](http://gtms01.alicdn.com/tps/i1/TB1SiKUGXXXXXciXpXXzj1ZSVXX-1586-380.png)
+          </section>
+        </section>
+
+        <section data-markdown>
+          ## 完整代码地址戳[这里](https://github.com/christineRR/unit-test-demo)
+        </section>
+        <section data-markdown>
+          ## 参考
+          + [实战nodejs 单元测试](http://fengmk2.cnpmjs.org/ppt/unittest-and-bdd-in-nodejs-with-mocha.html)
+          + [the difference between bdd and tdd](http://joshldavis.com/2013/05/27/difference-between-tdd-and-bdd/)
+          + [tdd vs bdd](http://blog.mattwynne.net/2012/11/20/tdd-vs-bdd/)
+          + [node modules](https://github.com/joyent/node/wiki/modules#testing)
+          + [istanbul with mocha](https://coderwall.com/p/x6jfwg)
+        </section>
+
+        <section data-markdown>
+          ## 谢谢大家
+          ![](http://gtms02.alicdn.com/tps/i2/TB1XBOxGXXXXXXpXFXXPaKuOXXX-263-264.jpg)
+        </section>
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+
+    <script>
+
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: 'concave', // default/cube/page/concave/zoom/linear/fade/none
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
