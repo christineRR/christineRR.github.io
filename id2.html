@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>JavaScript的OO及继承实现 -- by liuxin.rkl</title>
+
+    <meta name="description" content="javascript oo class and inheritance">
+    <meta name="author" content="liuxin.rkl">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.min.css">
+    <link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+    <script>
+      if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+      }
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section data-markdown>
+          <script type="text/template">
+          ## JavaScript的OO及继承实现
+
+          —— by [liuxin.rkl](https://github.com/christineRR) 2014-09-05 
+          </script>
+        </section>
+
+        <section>
+          <section>
+            <h2>什么是对象？</h2>
+            <p>
+              An object is a collection of properties and has a single prototype object. The prototype may be either an object or the null value.
+            </p>
+
+            <aside class="notes">
+              自有属性的集合、一个原型链对象
+            </aside>
+          </section>
+          <section data-markdown>
+            ```js
+            var foo = {
+              x: 10,
+              y: 20
+            };
+            ```
+
+            ![](http://dmitrysoshnikov.com/wp-content/uploads/basic-object.png)
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>什么是原型链？</h2>
+            <p>
+              A prototype chain is a finite chain of objects which is used to implement inheritance and shared properties.
+            </p>
+          </section>
+          <section>
+            <h2>特殊属性__proto__</h2>
+            <ul>
+              <li class="fragment">标准：ECMAScript5 [[Prototype]]</li>
+              <li class="fragment">from [FireFox, V8, Safari] to ECMASctript6 </li>
+              <li class="fragment">Object.getPrototypeOf()</li>
+              <li class="fragment">Object.create()</li>
+            </ul>
+          </section>
+          <section data-markdown>
+            ```js
+            //创建及读取
+            var myProto = {};
+
+            var obj = Object.create(myProto);
+
+            Object.getPrototypeOf(obj) === myProto
+            ```
+
+            ```js
+            //指定对象原型
+            var obj = {
+              __proto__: myProto,
+              foo: 123,
+              bar: "abc"
+            };
+            ```
+          </section>
+          <section>
+            <p>原型`prototype`和原型链`__proto__`的区别？</p>
+            <p class="fragment">
+            原型是包含若干属性的对象，原型链是对原型对象的引用，是javascript实现继承的关键
+            </p>
+          </section>
+          <section data-markdown>
+            ```js
+            var a = {
+              x: 10,
+              calculate: function (z) {
+                return this.x + this.y + z
+              }
+            };
+
+            var b = {
+              y: 20,
+              __proto__: a
+            };
+
+            var c = {
+              y: 30,
+              __proto__: a
+            };
+
+            // call the inherited method
+            b.calculate(30); // 60
+            c.calculate(40); // 80
+            ```
+          </section>
+          <section data-markdown>
+            ![](http://dmitrysoshnikov.com/wp-content/uploads/prototype-chain.png)
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>javascript的oo实现</h2>
+            <p>
+            通过函数来实现类的定义，函数被定义出来后，一定包含prototype属性，是这个函数的原型对象（<a href="http://www.ecma-international.org/ecma-262/5.1/#sec-13.2">详细</a>），这是javascript赋予Function可以被作为构造器使用的关键。
+            </p>
+            <aside class="notes">
+              javascript中没有所谓的类，只能通过Function的来完成，在渐进的过程中增强。
+            </aside>
+          </section>
+          <section data-markdown>
+            ```js
+            // Foo class
+            function Foo(y) {
+              this.y = y;
+            }
+            Foo.prototype.x = 10;
+            Foo.prototype.calculate = function (z) {
+              return this.x + this.y + z;
+            }
+
+            var b = new Foo(20);
+            var c = new Foo(30);
+
+            // 结论
+            console.log(b.__proto__ === Foo.prototype);
+            console.log(c.__proto__ === Foo.prototype);
+            console.log(b.constructor === Foo);
+            console.log(b.hasOwnProperty('constructor') === false);
+            console.log(b.__proto__.hasOwnProperty('constructor') === true);
+            console.log(Foo.__proto__ === Function.prototype);
+            console.log(Foo.prototype.constructor === Foo);
+            ```
+          </section>
+          <section data-markdown>
+            ![](http://dmitrysoshnikov.com/wp-content/uploads/constructor-proto-chain.png)]
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            ## OO及继承实现
+
+            + class 类定义
+            + extends 可继承
+          </section>
+          <section data-markdown>
+          class 定义
+
+          + 公共成员
+          + 私有成员
+          + 特权成员
+
+          ```js
+          function Foo(info) {
+            var city = 'hangzhou';
+            this.info = info + ' from ' + city;
+            this.sayCity = function () {
+              console.log(city);
+            };
+          }
+          Foo.prototype.sayInfo = function () {
+            console.log(this.info);
+          }
+          ```
+          </section>
+          <section data-markdown>
+          extends继承
+
+          ```js
+          function Class(o) {
+            // Convert existed function to Class
+            if (typeof o === 'function') {
+              o.extends = Class.extends;
+              return o;
+            }
+          }
+
+          Class.extends = function (properties) {...}
+          module.exports = Class;
+          ```
+          
+          + 子类构造器函数
+          + 继承父类static properties
+          + 继承父类原型链
+          + 扩展自身原型链
+          </section>
+          <section data-markdown>
+          ```js
+          var parent = this;
+
+          // 子类构造器函数
+          function SubClass() {
+            parent.apply(this, arguments);
+            if (this.constructor === SubClass && this.__constructor) {
+              this.__constructor.apply(this, arguments);
+            }
+          }
+
+          // 子类继承父类static properties
+          mix(SubClass, parent);
+
+          // 子类继承父类原型链
+          var proto = createProto(parent.prototype);
+          proto.constructor = SubClass;
+          SubClass.prototype = proto;
+          SubClass.__super__ = parent.prototype;
+
+          // 子类的原型对象中添加properties对象的显示属性
+          mix(SubClass.prototype, properties);
+          ```
+          </section>
+          <section data-markdown>
+            createProto [性能对比](http://jsperf.com/object-create-vs-proto-vs-new-ctor)
+            ![](http://gtms02.alicdn.com/tps/i2/TB1tIWCGXXXXXa2XXXXeEI2SpXX-1934-546.png)
+          </section>
+          <section data-markdown>
+            coffee兼容
+
+            + `__super__ `父类原型对象
+            + Class(coffee class)
+          </section>
+          <section data-markdown>
+            示例
+
+            ```js
+            // 定义新的class
+            var Class = require('class.js');
+
+            var Animal = Class.extends({
+              __constructor: function () {},
+              move: function () {}
+            });
+
+            module.exports = Animal;
+            ```
+
+            ```js
+            // 已有的function类转化为class，可被继承
+            var Class = require('class.js');
+
+            function Event () {...}
+
+            Event.prototype.on = function () {};
+
+            module.exports = Class(Event);
+            ```
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            ## ES6 class
+
+            Notice: in ES6 the concept of a “class” is standardized, and is implemented as exactly a syntactic sugar on top of the constructor functions as described above.
+          </section>
+          <section data-markdown>
+            
+            ```js
+            // ES6
+            class Foo {
+              constructor(name) {
+                this._name = name;
+              }
+              getName() {
+                return this._name;
+              }
+            }
+            class Bar extends Foo {
+              getName() {
+                return super.getName() + ' Doe';
+              }
+            }
+            var bar = new Bar('John');
+            console.log(bar.getName()); // John Doe
+            ```
+          </section>
+        </section>
+
+        <section data-markdown>
+          ## 参考
+          + [javascript core](http://dmitrysoshnikov.com/ecmascript/javascript-the-core/)
+          + [difference between `__proto__` and prototype](http://www.quora.com/What-is-the-difference-between-__proto__-and-prototype?q=javascript+__proto__+prototype)
+          + [Function MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function)
+          + [Function.prototype MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/prototype)
+          + [`__proto__`](http://www.cnblogs.com/ziyunfei/archive/2012/10/05/2710955.html)
+          + [Private Members in JavaScript](http://javascript.crockford.com/private.html)
+        </section>
+
+        <section data-markdown>
+          ## 谢谢大家
+          ![](http://gtms02.alicdn.com/tps/i2/TB1XBOxGXXXXXXpXFXXPaKuOXXX-263-264.jpg)
+        </section>
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+
+    <script>
+
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: 'concave', // default/cube/page/concave/zoom/linear/fade/none
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>
