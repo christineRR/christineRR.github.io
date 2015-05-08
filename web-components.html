@@ -94,11 +94,6 @@
             ## Custom Elements
 
             custome elements 提供了开发者一种可以自定义自己的 dom 元素的方式，用语义化的定义使 web 应用本身的功能特性更易理解和描述。
-
-            + 本地名称 local name
-            + 命名空间 namespace
-            + 自定义元素原型对象（custome element prototype）
-            + 生命周期（lifecycle callbacks）
           </section>
           <section data-markdown>
             ### 创建自定义元素
@@ -122,7 +117,7 @@
             document.body.appendChild(new MyElement());
             ```
 
-            ```html
+            ```js
             <my-element></my-element>
             ```
 
@@ -146,7 +141,7 @@
             });
             ```
 
-            ```html
+            ```js
             <button is='my-button'></button>
             ```
           </section>
@@ -182,7 +177,7 @@
           <section data-markdown>
             自定义元素的注册是通过脚本执行来完成的，所以创建本身是可以在注册之前的，例如：
 
-            ```html
+            ```js
             <my-element></my-element>
             ```
             ```js
@@ -259,7 +254,7 @@
               shadow dom 可以隐藏自定义元素内部的结构，隔离了外部对自定义元素内部 dom 结构的侵入性修改及探测。
             </aside>
           </section>
-          <section data-markdown>`
+          <section data-markdown>
             ```js
             var MyElementProto = Object.create(HTMLElement.prototype);
 
@@ -275,16 +270,12 @@
           </section>
           <section data-markdown>
             ```js
-            var MyElementProto = Object.create(HTMLElement.prototype);
-
-            MyElementProto.createdCallback = function() {
-              // 1. Attach a shadow root on the element.
-              var shadow = this.createShadowRoot();
-              // 2. Fill it with markup.
-              shadow.innerHTML = "<p>It's a story about me, long long time ago</p>";
-            };
-
-            var MyElement = document.registerElement('my-element', {prototype: XFooProto});
+            <div><h3>Light DOM</h3></div>
+            ```
+            ```js
+            var root = document.querySelector('div').createShadowRoot();
+            root.innerHTML = '<style>h3{ color: red; }</style>' + 
+                             '<h3>Shadow DOM</h3>';
             ```
           </section>
         </section>
@@ -298,10 +289,10 @@
 
             结合文档树做对比：
 
-            ```html
+            ```js
             <!-- shadow host -->
             <div>
-              <!-- shadow root -->
+              <!-- shadow tree -->
               <p>
                 <h3>标题</h3>
                 <span>内容</span>
@@ -311,7 +302,7 @@
           </section>
           <section data-markdown>
             ### multiple shadow roots
-            ```html
+            ```js
             <div id="example1">Light DOM</div>
             ```
             ```js
@@ -373,6 +364,10 @@
           <section data-markdown>
             ### 事件模型
 
+            shadow dom 子树中的事件可以在文档（document）中被监听，但是在事件在穿过 shadow dom 边界的时候，触发事件的target 会被重新设置，以免暴露 shadow dom 中的内部结构。
+
+            但是以下事件会被阻止：
+
             + abort
             + error
             + select
@@ -393,7 +388,7 @@
             + `:host` 作用于宿主元素，or `:host(<selector>) `
             + `:host-context` 
 
-            ```html
+            ```js
             <body class="different">
               <x-foo></x-foo>
             </body>
@@ -413,16 +408,14 @@
           <section data-markdown>
             ## Html Template
 
-            shadow dom 越复杂，拼接的字符串就越多，这是一种混乱而且低效的使用方式，还会有额外的 xss 隐患。所以我们有了 `<template>`
+            shadow dom 越复杂，拼接的字符串就越多，这是一种混乱而且低效的使用方式，还会有额外的 xss 隐患。所以我们有了 `template`
 
-            > `<template>` 标签允许声明一段文档片段（dom fragments），是自定义元素的完整结构声明，标准的基于 dom 的客户端模版。
-
-            `<tempalete>` 的 content 不会被浏览器渲染和执行（包括里面的script 和 style），也不会存在于 dom 树中。
+            `template` 标签允许声明一段文档片段（dom fragments），是自定义元素的完整结构声明，标准的基于 dom 的客户端模版。
           </section>
           <section data-markdown>
             ### 激活模版
 
-            模版本身是不可能被与加载的，模版内容的渲染和执行只能通过以下激活的方式：
+            默认浏览器是不会渲染模版内容的，模版内容的渲染和执行只能通过以下激活的方式：
 
             ```js
             var t = document.querySelector('#mytemplate');
@@ -440,6 +433,9 @@
         <section>
           <section data-markdown>
             ## html imports
+
+            `import` 特性提供了以link方式来导入一段html文本的功能,相当于是template的进化版,方便做成模板文件
+
           </section>
         </section>
 
