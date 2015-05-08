@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>web components -- by liuxin.rkl</title>
+
+    <meta name="description" content="web components ploymer">
+    <meta name="author" content="liuxin.rkl">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.min.css">
+    <link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+    <script>
+      if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+      }
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section data-markdown>
+          <script type="text/template">
+          ## web components
+
+          —— by [liuxin.rkl](https://github.com/christineRR) 2015-05-08 
+          </script>
+        </section>
+
+        <section>
+          <section>
+            <p>
+              Web Components 是由 W3C 正在构建的草案（working drafts），约定了基于泛 HTML 体系构建组件库的方式。
+            </p>
+
+            <aside class="notes">
+              泛 HTML 体系包括哪些？html javascript css
+
+              原因：
+
+              在大型软件中，组件化是一种共识，它一方面提高了开发效率，另一方面降低了维护成本。但是在Web前端这个领域，并没有很通用的组件模式，因为缺少一个大家都能认同的实现方式，所以很多框架/库都实现了自己的组件化方式。
+
+              关键点：
+
+              当我们使用各种编程技巧对组件进行封装时，一个无法规避的事实是，组件的内部是可被访问和影响的，例如我们对样式表进行改动时经常会担心影响到页面组件的样式。而通过Web Component封装出来的组件，我们可以选择让组件的内部隐藏起来，也就是说，组件内部是与世隔绝的！
+            </aside>
+          </section>
+          <section data-markdown>
+            冷知识装逼利器一：
+            ![](http://gtms02.alicdn.com/tps/i2/TB1vdy8HFXXXXabapXXJdCDGpXX-1452-214.png)
+
+            + Working Drafts (WD)
+            + Candidate Recommendation (CR)
+            + Proposed Recommendation (PR)
+            + W3C Recommendation (REC)
+
+            [详情](http://www.w3.org/2014/Process-20140801/#rec-advance)
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            ## W3C Web Components：
+
+            + Custom Elements
+            + Shadow DOM
+            + HTML Templates
+            + HTML Imports
+          </section>
+          <section data-markdown>
+            ## Custom Elements
+
+            custome elements 提供了开发者一种可以自定义自己的 dom 元素的方式，用语义化的定义使 web 应用本身的功能特性更易理解和描述。
+
+            + 本地名称 local name
+            + 命名空间 namespace
+            + 自定义元素原型对象（custome element prototype）
+            + 生命周期（lifecycle callbacks）
+          </section>
+          <section data-markdown>
+            ### 创建自定义元素
+            ```js
+            var MyElement =  document.registerElement('my-element');
+            ```
+
+            自定义元素继承于 `HTMLElement`，所以以下效果同上：
+
+            ```js
+            var MyElement = document.registerElement('my-element', {
+              prototype: Object.create(HTMLElement.prototype)
+            });
+            ```
+            **自定义元素命名必须小写字母包含`-`，例如`x-foo` 合法，`tabs` 不合法**
+          </section>
+          <section data-markdown>
+            调用：
+
+            ```js
+            document.body.appendChild(new MyElement());
+            ```
+
+            ```html
+            <my-element></my-element>
+            ```
+
+            ```js
+            // "tabs" is not a valid custom element name
+            document.createElement('tabs').__proto__ === HTMLUnknownElement.prototype;
+
+            // "x-tabs" is a valid custom element name
+            document.createElement('x-foo').__proto__ == HTMLElement.prototype
+            ```
+          </section>
+          <section data-markdown>
+            ### 自定义元素的继承
+
+            原生元素扩展：
+
+            ```js
+            var MyButton = document.registerElement('my-button', {
+              prototype: Object.create(HTMLButtonElement.prototype),
+              extends: 'button'
+            });
+            ```
+
+            ```html
+            <button is='my-button'></button>
+            ```
+          </section>
+          <section data-markdown>
+            自定义元素扩展：
+
+            ```js
+            // prototype
+            var MyElementProto = Object.create(HTMLElement.prototype);
+            // custom element my-element
+            var MyElement = document.registerElement('my-element', {
+              prototype: MyElementProto
+            });
+            // my-element-extend extended from my-element
+            var MyElementExtend = document.registerElement('my-element-extend', {
+              prototype: MyElementProto,
+              extends: 'my-element'
+            });
+            ```
+          </section>
+          <section data-markdown>
+            ### 运行机制
+
+            在自定义元素的生命周期中，由如下变化会被监听：
+
+            + 自定义元素注册之前被创建
+            + 自定义元素注册之后被创建
+            + 自定义元素被插入或移除 dom 树中
+            + 自定义元素的属性被创建、修改或删除
+
+            以上每个条件被触发时，都会有对应的回调函数来处理，w3c 中对不同阶段的回调函数有详细的输入输出定义。
+          </section>
+          <section data-markdown>
+            自定义元素的注册是通过脚本执行来完成的，所以创建本身是可以在注册之前的，例如：
+
+            ```html
+            <my-element></my-element>
+            ```
+            ```js
+            var myElement = document.createElement('my-element');
+            myElement.addEventListener('click', function(e) {
+              alert('Thanks!');
+            });
+            ```
+
+            这是因为浏览器会对未识别的元素归类为 unresolved ，在注册完成后提升为一个完整的元素。
+          </section>
+          <section data-markdown>
+            ### callbacks 类型
+            + createdCallback
+            + attachedCallback
+            + detachedCallback
+            + attributeChangedCallback
+
+            ```js
+            var proto = Object.create(HTMLElement.prototype);
+
+            proto.createdCallback = function() {...};
+            proto.attachedCallback = function() {...};
+
+            var MyElement = document.registerElement('my-element', {prototype: proto});
+            ```
+          </section>
+          <section data-markdown>
+            回调大部分场景用于自定义元素中事件的绑定和销毁
+
+            ```js
+            proto.createdCallback = function() {
+              this.addEventListener('click', function(e) {
+                alert('Thanks!');
+              });
+            };
+            ```
+          </section>
+          <section data-markdown>
+            #### 自定义元素添加其他元素
+            ```js
+            var MyElement = document.registerElement('my-element', {
+              prototype: Object.create(HTMLElement.prototype, {
+                name: {
+                  get: function() { return 'rose'; }
+                },
+                say: function() {
+                  alert('foo() called');
+                }
+              })
+            });
+            ```
+          </section>
+          <section data-markdown>
+            ```js
+            var MyElementProto = Object.create(HTMLElement.prototype);
+
+            MyElementProto.createdCallback = function() {
+              this.innerHTML = "<p>It's a story about me, long long time ago</p>";
+            };
+
+            var MyElement = document.registerElement('my-element', {prototype: XFooProto});
+            ```
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Shadow Dom</h2>
+            <p>
+            灵活的自定义元素的出现，让我们可以通过自定义元素描述功能特性。问题是自定义元素内部的 dom 结构还是暴漏在文档流中，如何解决这个问题呢？于是有了 `shodow dom`。
+            </p>
+            <aside class="notes">
+              shadow dom 可以隐藏自定义元素内部的结构，隔离了外部对自定义元素内部 dom 结构的侵入性修改及探测。
+            </aside>
+          </section>
+          <section data-markdown>`
+            ```js
+            var MyElementProto = Object.create(HTMLElement.prototype);
+
+            MyElementProto.createdCallback = function() {
+              // 1. Attach a shadow root on the element.
+              var shadow = this.createShadowRoot();
+              // 2. Fill it with markup.
+              shadow.innerHTML = "<p>It's a story about me, long long time ago</p>";
+            };
+
+            var MyElement = document.registerElement('my-element', {prototype: XFooProto});
+            ```
+          </section>
+          <section data-markdown>
+            ```js
+            var MyElementProto = Object.create(HTMLElement.prototype);
+
+            MyElementProto.createdCallback = function() {
+              // 1. Attach a shadow root on the element.
+              var shadow = this.createShadowRoot();
+              // 2. Fill it with markup.
+              shadow.innerHTML = "<p>It's a story about me, long long time ago</p>";
+            };
+
+            var MyElement = document.registerElement('my-element', {prototype: XFooProto});
+            ```
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            ### 概念
+            + shadow host 宿主
+            + shadow tree
+            + shadow root 宿主根节点
+
+            结合文档树做对比：
+
+            ```html
+            <!-- shadow host -->
+            <div>
+              <!-- shadow root -->
+              <p>
+                <h3>标题</h3>
+                <span>内容</span>
+              </p>
+            </div>
+            ```
+          </section>
+          <section data-markdown>
+            ### multiple shadow roots
+            ```html
+            <div id="example1">Light DOM</div>
+            ```
+            ```js
+            <script>
+            var container = document.querySelector('#example1');
+            var root1 = container.createShadowRoot();
+            var root2 = container.createShadowRoot();
+            var root3 = container.createShadowRoot();
+            root1.innerHTML = '<div>Root 1 FTW</div>';
+            root2.innerHTML = '<div>Root 2 FTW</div>';
+            root3.innerHTML = '<div>Root 3 FTW</div>';
+            </script>
+            ```
+          </section>
+          <section data-markdown>
+            shadow tree是可以叠加成shadow trees的，叠加后，后者shadow tree会覆盖前者
+
+            + oldest shadow tree
+            + youngest shadow tree
+
+            ![](http://gtms04.alicdn.com/tps/i4/TB1Ov6nHFXXXXbHaXXXEJDq2FXX-1742-1518.png)
+          </section>
+          <section data-markdown>
+            ### 插入节点
+
+            `<shadow></shadow>` ：
+
+            shadow trees 的插入节点，一个 shadow tree 只插入第一个位置，其余忽略
+
+            `<content></content>`：
+
+            宿主节点子节点的插入节点
+          </section>
+          <section data-markdown>
+            ```js
+            // multiple shadow root
+            var container = document.querySelector('#container');
+            var root1 = container.createShadowRoot();
+            var root2 = container.createShadowRoot();
+            var root3 = container.createShadowRoot();
+
+            // insert points
+            root1.innerHTML = '<div>Root 1 FTW</div><content></content>';
+            root2.innerHTML = '<shadow></shadow><div>Root 2 FTW</div><shadow></shadow>';
+            root3.innerHTML = '<div>Root 3 FTW</div><shadow></shadow>';
+
+            console.log(root3.olderShadowRoot === root2);
+            // youngest shadow root
+            console.log(container.shadowRoot === root3);
+            console.log(root2.olderShadowRoot === root1);
+            ```
+          </section>
+          <section data-markdown>
+            `<content></content>` 将宿主节点的内容引入shadow dom中后，是不能通过 document 获取到的。
+
+            + `getDistributedNodes`
+            + `getDestinationInsertionPoints`
+          </section>
+          <section data-markdown>
+            ### 事件模型
+
+            + abort
+            + error
+            + select
+            + change
+            + load
+            + reset
+            + resize
+            + scroll
+            + selectstart
+          </section>
+          <section data-markdown>
+            ### 样式
+
+            shadow dom 中的样式中作用于 shadow dom 的域，与外界隔离。
+
+            伪类：
+
+            + `:host` 作用于宿主元素，or `:host(<selector>) `
+            + `:host-context` 
+
+            ```html
+            <body class="different">
+              <x-foo></x-foo>
+            </body>
+            ```
+            ```css
+            :host-context(.different) {
+              color: red;
+            }
+            ```
+            + `::shadow` 作用于 shadow dom 中内部的 shadow tree 中的元素
+            + `/deep/` 可以打破所有 shadow dom 的边界，多用于多级 shadow dom 的下，设置样式
+            + `::content` 伪类提供了对 shadow dom 中宿主元素插入节点内的样式的获取
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            ## Html Template
+
+            shadow dom 越复杂，拼接的字符串就越多，这是一种混乱而且低效的使用方式，还会有额外的 xss 隐患。所以我们有了 `<template>`
+
+            > `<template>` 标签允许声明一段文档片段（dom fragments），是自定义元素的完整结构声明，标准的基于 dom 的客户端模版。
+
+            `<tempalete>` 的 content 不会被浏览器渲染和执行（包括里面的script 和 style），也不会存在于 dom 树中。
+          </section>
+          <section data-markdown>
+            ### 激活模版
+
+            模版本身是不可能被与加载的，模版内容的渲染和执行只能通过以下激活的方式：
+
+            ```js
+            var t = document.querySelector('#mytemplate');
+            // Populate the src at runtime.
+            t.content.querySelector('img').src = 'logo.png';
+
+            var clone = document.importNode(t.content, true);
+            document.body.appendChild(clone);
+            ```
+
+            需要注意嵌套模版，父模版激活不会影响子模版，子模版要手动激活。
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            ## html imports
+          </section>
+        </section>
+
+        <section data-markdown>
+          ## 参考
+          + [w3c web components](http://www.w3.org/TR/#tr_Web_Components)
+          + [2015前端组件化框架之路](https://github.com/xufei/blog/issues/19)
+          + [Custom Elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/#publicapi)
+          + [Shadow Dom 101](http://www.html5rocks.com/en/tutorials/webcomponents/shadowdom/)
+          + [Shadow Dom 201](http://www.html5rocks.com/en/tutorials/webcomponents/shadowdom-201/)
+          + [Shadow Dom 301](http://www.html5rocks.com/en/tutorials/webcomponents/shadowdom-301/)
+          + [Html Template](http://www.html5rocks.com/en/tutorials/webcomponents/template/)
+        </section>
+
+        <section data-markdown>
+          ## 谢谢大家
+          ![](http://gtms02.alicdn.com/tps/i2/TB1XBOxGXXXXXXpXFXXPaKuOXXX-263-264.jpg)
+        </section>
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+
+    <script>
+
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: 'concave', // default/cube/page/concave/zoom/linear/fade/none
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>

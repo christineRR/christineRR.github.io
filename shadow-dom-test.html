@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+  <div id="container">
+    <p>I am container's child 1</p>
+    <p>I am container's child 2</p>
+  </div>
+  <script type="text/javascript">
+  // multiple shadow root
+  var container = document.querySelector('#container');
+  var root1 = container.createShadowRoot();
+  var root2 = container.createShadowRoot();
+  var root3 = container.createShadowRoot();
+
+  // 叠加
+  // root1.innerHTML = '<div>Root 1 FTW</div>';
+  // root2.innerHTML = '<div>Root 2 FTW</div>';
+  // root3.innerHTML = '<div>Root 3 FTW</div>';
+  
+  // insert points
+  root1.innerHTML = '<content></content><div>Root 1 FTW</div><content></content>';
+  root2.innerHTML = '<shadow></shadow><div>Root 2 FTW</div><shadow></shadow>';
+  root3.innerHTML = '<div>Root 3 FTW</div><shadow></shadow>';
+
+  console.log(root3.olderShadowRoot === root2);
+  // youngest shadow root
+  console.log(container.shadowRoot === root3);
+  console.log(root2.olderShadowRoot === root1);
+  </script>
+</body>
+</html>
