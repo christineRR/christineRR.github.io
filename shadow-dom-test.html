@@ -21,14 +21,14 @@
   // root3.innerHTML = '<div>Root 3 FTW</div>';
   
   // insert points
-  root1.innerHTML = '<content></content><div>Root 1 FTW</div><content></content>';
-  root2.innerHTML = '<shadow></shadow><div>Root 2 FTW</div><shadow></shadow>';
+  root1.innerHTML = '<content></content><div>Root 1 FTW</div>';
+  root2.innerHTML = '<shadow></shadow><div>Root 2 FTW</div>';
   root3.innerHTML = '<div>Root 3 FTW</div><shadow></shadow>';
 
-  console.log(root3.olderShadowRoot === root2);
-  // youngest shadow root
-  console.log(container.shadowRoot === root3);
-  console.log(root2.olderShadowRoot === root1);
+  // console.log(root3.olderShadowRoot === root2);
+  // // youngest shadow root
+  // console.log(container.shadowRoot === root3);
+  // console.log(root2.olderShadowRoot === root1);
   </script>
 </body>
 </html>
