@@ -117,8 +117,8 @@
             document.body.appendChild(new MyElement());
             ```
 
-            ```js
-            <my-element></my-element>
+            ```html
+            &lt;my-element&gt;&lt;/my-element&gt;
             ```
 
             ```js
@@ -141,8 +141,8 @@
             });
             ```
 
-            ```js
-            <button is='my-button'></button>
+            ```html
+            &lt;button is='my-button'&gt;&lt;/button&gt;
             ```
           </section>
           <section data-markdown>
@@ -177,8 +177,8 @@
           <section data-markdown>
             自定义元素的注册是通过脚本执行来完成的，所以创建本身是可以在注册之前的，例如：
 
-            ```js
-            <my-element></my-element>
+            ```html
+            &lt;my-element&gt;&lt;/my-element&gt;
             ```
             ```js
             var myElement = document.createElement('my-element');
@@ -269,13 +269,12 @@
             ```
           </section>
           <section data-markdown>
-            ```js
-            <div><h3>Light DOM</h3></div>
+            ```html
+            &lt;div&gt;&lt;h3&gt;Light DOM&lt;/h3&gt;&lt;/div&gt;
             ```
             ```js
             var root = document.querySelector('div').createShadowRoot();
-            root.innerHTML = '<style>h3{ color: red; }</style>' + 
-                             '<h3>Shadow DOM</h3>';
+            root.innerHTML = '<style>h3{ color: red; }</style><h3>Shadow DOM</h3>';
             ```
           </section>
         </section>
@@ -289,24 +288,23 @@
 
             结合文档树做对比：
 
-            ```js
-            <!-- shadow host -->
-            <div>
-              <!-- shadow tree -->
-              <p>
-                <h3>标题</h3>
-                <span>内容</span>
-              </p>
-            </div>
+            ```html
+            &lt;!-- shadow host --&gt;
+            &lt;div&gt;
+              &lt;!-- shadow tree --&gt;
+              &lt;p&gt;
+                &lt;h3&gt;title&lt;/h3&gt;
+                &lt;span&gt;content&lt;/span&gt;
+              &lt;/p&gt;
+            &lt;/div&gt;
             ```
           </section>
           <section data-markdown>
             ### multiple shadow roots
-            ```js
-            <div id="example1">Light DOM</div>
+            ```html
+            &lt;div id=&quot;example1&quot;&gt;Light DOM&lt;/div&gt;
             ```
             ```js
-            <script>
             var container = document.querySelector('#example1');
             var root1 = container.createShadowRoot();
             var root2 = container.createShadowRoot();
@@ -314,7 +312,6 @@
             root1.innerHTML = '<div>Root 1 FTW</div>';
             root2.innerHTML = '<div>Root 2 FTW</div>';
             root3.innerHTML = '<div>Root 3 FTW</div>';
-            </script>
             ```
           </section>
           <section data-markdown>
@@ -322,7 +319,8 @@
 
             + oldest shadow tree
             + youngest shadow tree
-
+          </section>
+          <section data-markdown>
             ![](http://gtms04.alicdn.com/tps/i4/TB1Ov6nHFXXXXbHaXXXEJDq2FXX-1742-1518.png)
           </section>
           <section data-markdown>
@@ -365,7 +363,8 @@
             ### 事件模型
 
             shadow dom 子树中的事件可以在文档（document）中被监听，但是在事件在穿过 shadow dom 边界的时候，触发事件的target 会被重新设置，以免暴露 shadow dom 中的内部结构。
-
+          </section>
+          <section data-markdown>
             但是以下事件会被阻止：
 
             + abort
@@ -382,22 +381,25 @@
             ### 样式
 
             shadow dom 中的样式中作用于 shadow dom 的域，与外界隔离。
-
-            伪类：
-
+          </section>
+          <section data-markdown>
             + `:host` 作用于宿主元素，or `:host(<selector>) `
+          </section>
+          <section data-markdown>
             + `:host-context` 
 
-            ```js
-            <body class="different">
-              <x-foo></x-foo>
-            </body>
+            ```html
+            &lt;body class=&quot;different&quot;&gt;
+              &lt;x-foo&gt;&lt;/x-foo&gt;
+            &lt;/body&gt;
             ```
             ```css
             :host-context(.different) {
               color: red;
             }
             ```
+          </section>
+          <section data-markdown>
             + `::shadow` 作用于 shadow dom 中内部的 shadow tree 中的元素
             + `/deep/` 可以打破所有 shadow dom 的边界，多用于多级 shadow dom 的下，设置样式
             + `::content` 伪类提供了对 shadow dom 中宿主元素插入节点内的样式的获取
@@ -436,6 +438,9 @@
 
             `import` 特性提供了以link方式来导入一段html文本的功能,相当于是template的进化版,方便做成模板文件
 
+            ```html
+            &lt;link rel=&quot;import&quot; href=&quot;import.html&quot;&gt;
+            ```
           </section>
         </section>
 
